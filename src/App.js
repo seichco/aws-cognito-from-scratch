@@ -1,16 +1,19 @@
 import React from 'react';
-import logo from './logo.svg';
+import { Authenticator } from 'aws-amplify-react';
 import './App.css';
 import { SignIn } from './authentication/SignIn';
+import { ConfirmTotp } from './authentication/ConfirmTotp';
+import { LogOut } from './authentication/LogOut';
+import { AuthStatus } from './authentication/AuthStatus';
 
 function App() {
   return (
-    <div className='App'>
-      <header className='App-header'>
-        <h1>Custom AWS Cognito Amplify Component</h1>
-        <SignIn />
-      </header>
-    </div>
+    <Authenticator hideDefault>
+      <SignIn />
+      <LogOut />
+      <ConfirmTotp />
+      <AuthStatus />
+    </Authenticator>
   );
 }
 
