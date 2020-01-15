@@ -6,14 +6,24 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 - `User` is presented a `username` and `password` form.
   - `authState: "signIn"`
-  - `User` can request a [password reset](#forgot/reset-password).
-    - `User` is redirected to [Password Reset](#forgot/reset-password) flow.
-  - `User` can submit form data.
-    - `SUCCESS`
+  - `User` can redirect to request a [password reset](#forgot/reset-password).
+  - `User` can submit username/password form data.
+    - `Auth.signIn() SUCCESS`
       - `User` may be sent to the [Change Password]() screen.
+        ```javascript
+        user.challengeName === 'NEW_PASSWORD_REQUIRED';
+        ```
       - `User` may be sent to the [TOTP](<#the-one-time-password-(totp)>) screen.
+        ```javascript
+        user.challengeName === 'SOFTWARE_TOKEN_MFA' ||
+          user.challengeName === 'SMS_MFA';
+        ```
       - `User` may be sent to the [TOTP Setup](<#the-one-time-password-(totp)>) screen.
-    - `FAILURE`
+        ```javascript
+        user.challengeName === 'MFA_SETUP';
+        ```
+      - **_Note:_** `challengeName` may be empty (if MFA is not set/required) or tied to a custom challenge flow (not demonstrated here).
+    - `Auth.signIn() FAILURE`
       ```javascript
       // Bad username
       {
