@@ -22,8 +22,9 @@ export function VerifyContact(props) {
 
   function verifyCode() {
     Auth.verifyCurrentUserAttributeSubmit(contact, code)
-      .then(() => {
-        props.onStateChange(AuthState.signedIn, props.authData);
+      .then(async data => {
+        const newUser = await Auth.currentAuthenticatedUser();
+        props.onStateChange(AuthState.signedIn, newUser);
       })
       .catch(err => {
         // TODO: error
@@ -43,13 +44,13 @@ export function VerifyContact(props) {
   }
 
   function skipVerification() {
-    props.onStateChange(AuthState.signIn, props.authData);
+    props.onStateChange(AuthState.signedIn, props.authData);
   }
 
   return validAuthStates.includes(props.authState) ? (
     <>
       {step === viewStep.select ? (
-        <Select onSelect={setSelection} onSubmit={verifySelection} />
+        <Select onSelect={setSelection} onSubmit={verifySelection} {...props} />
       ) : (
         <Verify onChange={setCode} onSubmit={verifyCode} />
       )}

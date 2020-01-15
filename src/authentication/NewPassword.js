@@ -1,5 +1,5 @@
 import React from 'react';
-import { Auth } from 'aws-amplify';
+import { Auth, JS } from 'aws-amplify';
 import { AuthState } from './AuthState';
 import { ChallengeName } from './ChallengeName';
 import { Button, Form, Input, Label } from '../components';
@@ -17,12 +17,34 @@ export function NewPassword(props) {
 
     Auth.completeNewPassword(user, password) // attributes?
       .then(user => {
+        console.log('completeNewPassword success', { user });
         if (user.challengeName === ChallengeName.SOFTWARE_TOKEN_MFA) {
           props.onStateChange(AuthState.confirmSignIn, user);
         }
 
         if (user.challengeName === ChallengeName.MFA_SETUP) {
           props.onStateChange(AuthState.TOTPSetup, user);
+        }
+
+        // No challengName, forwarded to signedIn because MFA not required
+        if (!user.challengeName) {
+          // Checks to see if User needs to verify email/phone.
+          Auth.verifiedContact(user).then(data => {
+            // User has a verified form of communication, skip.
+            if (!JS.isEmpty(data.verified)) {
+              props.onStateChange(AuthState.signedIn, {
+                ...user,
+                ...data,
+              });
+            } else {
+              // Give user opportunity to verify email/phone.
+              props.onStateChange(AuthState.verifyContact, {
+                ...user,
+                ...data,
+              });
+            }
+          });
+          props.onStateChange(AuthState.signedIn, user);
         }
       })
       .catch(err => {
