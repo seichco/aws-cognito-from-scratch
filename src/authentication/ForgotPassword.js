@@ -35,8 +35,9 @@ export function ForgotPassword(props) {
           // TODO!: Notify User of SUCCESS
           props.onStateChange(AuthState.signIn);
         })
-        .catch(() => {
+        .catch(err => {
           // TODO: Error
+          console.info('password reset submit error', { err });
         });
     }
   }
@@ -57,12 +58,13 @@ export function ForgotPassword(props) {
       .then(data => {
         // TODO: Let User know code request was successfully sent.
         // - data returns CodeDeliveryDetails: { AttributeName: 'email', DeliveryMedium: 'EMAIL', Destination: 'u***@e***.com' }
-        console.log('forgotPassword response', { data });
+        console.log('forgotPassword code request response', { data });
         setView(viewState.verifyCode);
       })
-      .catch(() => {
+      .catch(err => {
         // TODO: error
         // "Attempt limit exceeded, please try after some time." when requesting new code too frequently.
+        console.info('request forgotPassword code request response', { err });
       });
   }
 

@@ -73,6 +73,7 @@ export function SignIn(props) {
       .catch(err => {
         // TODO: errors
         //  "Password reset required for the user" when User uses an old password after Admin has reset it via User Pool.
+        console.log({ err });
 
         setForm({
           ...form,

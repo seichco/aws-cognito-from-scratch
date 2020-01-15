@@ -25,7 +25,10 @@ export function NewPassword(props) {
           props.onStateChange(AuthState.TOTPSetup, user);
         }
       })
-      .catch(console.info);
+      .catch(err => {
+        // TODO: err
+        console.info('Submit new password error', { err });
+      });
   }
 
   function handleInputChange(e) {
