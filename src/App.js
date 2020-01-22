@@ -10,7 +10,9 @@ import { SetupTotp } from './authentication/SetupTotp';
 import { SignIn } from './authentication/SignIn';
 import { SignOut } from './authentication/SignOut';
 import { StatePicker } from './authentication/StatePicker';
+import { ToggleMfa } from './authentication/ToggleMfa';
 import { VerifyContact } from './authentication/VerifyContact';
+import { Protected } from './pages/Protected';
 
 function App() {
   return (
@@ -23,7 +25,9 @@ function App() {
       <SetupTotp />
       <ConfirmTotp />
       <VerifyContact />
+      <Protected />
       <SignOut />
+      <ToggleMfa />
       <AuthStatus />
     </Authenticator>
   );
