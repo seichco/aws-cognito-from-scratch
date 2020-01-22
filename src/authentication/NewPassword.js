@@ -17,7 +17,6 @@ export function NewPassword(props) {
 
     Auth.completeNewPassword(user, password) // attributes?
       .then(user => {
-        console.log('completeNewPassword success', { user });
         if (user.challengeName === ChallengeName.SOFTWARE_TOKEN_MFA) {
           props.onStateChange(AuthState.confirmSignIn, user);
         }
@@ -26,7 +25,7 @@ export function NewPassword(props) {
           props.onStateChange(AuthState.TOTPSetup, user);
         }
 
-        // No challengName, forwarded to signedIn because MFA not required
+        // No challengeName, forwarded to signedIn because MFA not required
         if (!user.challengeName) {
           // Checks to see if User needs to verify email/phone.
           Auth.verifiedContact(user).then(data => {

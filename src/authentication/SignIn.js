@@ -51,6 +51,7 @@ export function SignIn(props) {
           props.onStateChange(AuthState.requireNewPassword, user);
         }
 
+        // No challengeName, forwarded to signedIn because MFA not required
         if (!user.challengeName) {
           // If MFA isn't required , this does one final check to see if User needs to verify email/phone.
           Auth.verifiedContact(user).then(data => {

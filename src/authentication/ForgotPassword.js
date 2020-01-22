@@ -31,7 +31,6 @@ export function ForgotPassword(props) {
     if (username && code && password) {
       Auth.forgotPasswordSubmit(username, code, password)
         .then(data => {
-          console.log('password reset submit success', { data });
           // TODO!: Notify User of SUCCESS
           props.onStateChange(AuthState.signIn);
         })
@@ -58,7 +57,6 @@ export function ForgotPassword(props) {
       .then(data => {
         // TODO: Let User know code request was successfully sent.
         // - data returns CodeDeliveryDetails: { AttributeName: 'email', DeliveryMedium: 'EMAIL', Destination: 'u***@e***.com' }
-        console.log('forgotPassword code request response', { data });
         setView(viewState.verifyCode);
       })
       .catch(err => {
@@ -121,7 +119,6 @@ export function ForgotPassword(props) {
         <Button
           type='button' // prevent button click on form submission
           onClick={e => {
-            console.log('clicked');
             e.preventDefault();
             setView(viewState.requestCode);
           }}

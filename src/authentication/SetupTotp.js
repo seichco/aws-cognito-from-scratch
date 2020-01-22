@@ -6,6 +6,16 @@ import { Button, Form, Input, Label } from '../components';
 
 const validAuthStates = [AuthState.TOTPSetup];
 
+function checkUserContact(user, props) {
+  Auth.verifiedContact(user).then(data => {
+    if (!JS.isEmpty(data.verified)) {
+      props.onStateChange(AuthState.signedIn, user);
+    } else {
+      props.onStateChange(AuthState.verifyContact, { ...user, ...data });
+    }
+  });
+}
+
 export function SetupTotp(props) {
   const [form, setForm] = React.useState({ challengeAnswer: '' });
   const isVisible = validAuthStates.includes(props.authState);
@@ -15,13 +25,8 @@ export function SetupTotp(props) {
     e.preventDefault();
 
     Auth.verifyTotpToken(user, form.challengeAnswer).then(response => {
-      Auth.setPreferredMFA(user, 'TOTP');
-      Auth.verifiedContact(user).then(data => {
-        if (!JS.isEmpty(data.verified)) {
-          props.onStateChange(AuthState.signedIn, user);
-        } else {
-          props.onStateChange(AuthState.verifyContact, { ...user, ...data });
-        }
+      Auth.setPreferredMFA(user, 'TOTP').then(_ => {
+        checkUserContact(user, props);
       });
     });
   }
@@ -32,6 +37,11 @@ export function SetupTotp(props) {
     } = e;
 
     setForm({ ...form, [name]: value });
+  }
+
+  function handleSkip(e) {
+    e.preventDefault();
+    checkUserContact(user, props);
   }
 
   return isVisible ? (
@@ -50,6 +60,9 @@ export function SetupTotp(props) {
         </div>
         <div>
           <Button>Verify</Button>
+        </div>
+        <div>
+          <Button onClick={handleSkip}>Skip</Button>
         </div>
       </Form>
     </>
