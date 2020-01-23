@@ -46,7 +46,9 @@ export function SetupTotp(props) {
 
   return isVisible ? (
     <>
-      <QrGenerator user={user} />
+      <div>
+        <QrGenerator user={user} />
+      </div>
       <Form onSubmit={handleSubmit}>
         <div>
           <Label>Code</Label>
@@ -72,13 +74,23 @@ export function SetupTotp(props) {
 function QrGenerator(props) {
   const { user } = props;
   const [value, setValue] = React.useState('');
+  const [code, setCode] = React.useState('');
 
   React.useEffect(() => {
     Auth.setupTOTP(user).then(secretCode => {
       const issuer = 'AWSCognito';
       const qrValue = `otpauth://totp/${issuer}:${user.username}?secret=${secretCode}&issuer=${issuer}`;
       setValue(qrValue);
+      setCode(secretCode);
     });
   }, [user]);
-  return <QrCode value={value} />;
+  return (
+    <>
+      <QrCode value={value} />
+      <div>
+        <label htmlFor='qrCode'>Or you can enter the code manually:</label>
+        <Input id='code' defaultValue={code} />
+      </div>
+    </>
+  );
 }
