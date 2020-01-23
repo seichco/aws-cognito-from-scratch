@@ -279,8 +279,11 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 ### API Responses
 
-- `Auth.verifyCurrentUserAttributeSubmit(contactType, code).then`
-- `Auth.verifyCurrentUserAttribute(contactType)`
+- `Auth.verifyCurrentUserAttribute(contactType).then(undefined)`
+- `Auth.verifyCurrentUserAttributeSubmit(contactType, code).then(response)`
+  ```javascript
+  'SUCCESS';
+  ```
 
 ### API Errors
 
@@ -334,6 +337,8 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
   - `User` should be notified of a successful password change (redirects them to form to sign in again).
 - TOTP Setup
   - ??? `User` should be able to enter the QR code manually (printing the `secretCode` to the screen). ???
+- Verify Contact
+  - ??? `User` should be able to toggle back and forth between selecting verification method and entering a code. ???
 - Signed In
   - ??? `User` should be able to enable/disable MFA from `signedIn` state ???
 - ??? `User` should be instructed to check their email on password request. ???

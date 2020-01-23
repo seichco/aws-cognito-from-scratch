@@ -22,7 +22,7 @@ export function VerifyContact(props) {
 
   function verifyCode() {
     Auth.verifyCurrentUserAttributeSubmit(contact, code)
-      .then(async data => {
+      .then(async () => {
         const newUser = await Auth.currentAuthenticatedUser();
         props.onStateChange(AuthState.signedIn, newUser);
       })
@@ -50,9 +50,27 @@ export function VerifyContact(props) {
   return validAuthStates.includes(props.authState) ? (
     <>
       {step === viewStep.select ? (
-        <Select onSelect={setSelection} onSubmit={verifySelection} {...props} />
+        <>
+          <Select
+            onSelect={setSelection}
+            onSubmit={verifySelection}
+            {...props}
+          />
+          <div>
+            <Button onClick={() => setStep(viewStep.verify)}>
+              Already have a code
+            </Button>
+          </div>
+        </>
       ) : (
-        <Verify onChange={setCode} onSubmit={verifyCode} />
+        <>
+          <Verify onChange={setCode} onSubmit={verifyCode} />
+          <div>
+            <Button onClick={() => setStep(viewStep.select)}>
+              Resend Code
+            </Button>
+          </div>
+        </>
       )}
       <Button onClick={skipVerification}>Skip</Button>
       <pre>{JSON.stringify({ contact, code }, null, 2)}</pre>
