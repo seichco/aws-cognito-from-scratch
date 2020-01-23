@@ -16,22 +16,21 @@ const buttonTextState = {
 };
 
 export function ToggleMfa(props) {
+  return validAuthStates.includes(props.authState) && props.authData ? (
+    <ToggleButton {...props} />
+  ) : null;
+}
+
+function ToggleButton(props) {
   const [preferredMfa, setPreferredMfa] = React.useState();
   const [buttonText, setButtonText] = React.useState('Getting MFA Status');
 
   React.useEffect(() => {
-    if (props.authData) {
-      if (props.authData.preferredMFA) {
-        setButtonText(buttonTextState[props.authData.preferredMFA]);
-        setPreferredMfa(props.authData.preferredMFA);
-      } else {
-        Auth.currentAuthenticatedUser().then(user => {
-          setButtonText(buttonTextState[user.preferredMFA]);
-          setPreferredMfa(user.preferredMFA);
-        });
-      }
-    }
-  }, [props.authData]);
+    Auth.currentAuthenticatedUser().then(user => {
+      setButtonText(buttonTextState[user.preferredMFA]);
+      setPreferredMfa(user.preferredMFA);
+    });
+  }, []);
 
   async function handleClick() {
     setButtonText('Updating MFA');
@@ -44,8 +43,13 @@ export function ToggleMfa(props) {
           setButtonText(buttonTextState[newPreferredMfa]);
         })
         .catch(err => {
-          // TODO! error
-          console.error('error setting preferred mfa', err);
+          if (
+            /User has not (set up|verified) software token mfa/.test(
+              err.message,
+            )
+          ) {
+            props.onStateChange(AuthState.TOTPSetup, user);
+          }
         });
     });
   }
