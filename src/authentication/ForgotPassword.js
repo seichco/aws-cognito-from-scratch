@@ -33,6 +33,7 @@ export function ForgotPassword(props) {
         .then(data => {
           // TODO!: Notify User of SUCCESS
           props.onStateChange(AuthState.signIn);
+          setView(viewState.requestCode);
         })
         .catch(err => {
           // TODO: Error
@@ -58,6 +59,7 @@ export function ForgotPassword(props) {
         // TODO: Let User know code request was successfully sent.
         // - data returns CodeDeliveryDetails: { AttributeName: 'email', DeliveryMedium: 'EMAIL', Destination: 'u***@e***.com' }
         setView(viewState.verifyCode);
+        setForm({ ...form, username: form.username });
       })
       .catch(err => {
         // TODO: error
@@ -94,7 +96,11 @@ export function ForgotPassword(props) {
           <Label>Username</Label>
         </div>
         <div>
-          <Input name='username' onChange={handleInputChange} />
+          <Input
+            name='username'
+            onChange={handleInputChange}
+            value={form.username}
+          />
         </div>
         <div>
           <Label>Code</Label>
