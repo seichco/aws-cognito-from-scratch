@@ -15,7 +15,7 @@ export function NewPassword(props) {
     const user = props.authData;
     const { password } = formValues;
 
-    Auth.completeNewPassword(user, password) // attributes?
+    Auth.completeNewPassword(user, password)
       .then(user => {
         if (user.challengeName === ChallengeName.SOFTWARE_TOKEN_MFA) {
           props.onStateChange(AuthState.confirmSignIn, user);
@@ -43,7 +43,6 @@ export function NewPassword(props) {
               });
             }
           });
-          props.onStateChange(AuthState.signedIn, user);
         }
       })
       .catch(err => {
