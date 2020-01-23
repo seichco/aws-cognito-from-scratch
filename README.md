@@ -2,11 +2,12 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 - [Sign In](#sign-in)
 - [Sign Out](#sign-out)
+- [Set Password](#Set-password)
+- [Forgot Password](#forgot-password)
 - [TOTP Setup](#the-one-time-password-totp-setup)
 - [TOTP Confirmation](#the-one-time-password-totp-confirmation)
 - [Verify Contact](#verify-contact)
-- [Reset Password](#reset-password)
-- [Forgot Password](#forgot-password)
+- [Other Considerations/Improvements](#other-considerationsimprovements)
 
 ## Sign In
 
@@ -21,6 +22,10 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 ### API Responses
 
 - `Auth.signIn(username, password).then(user);`
+  - `User` may be sent to the [Verify Contact](#verify-contact) screen if MFA is optional or not enabled.
+    ```javascript
+    user.challengeName === undefined;
+    ```
   - `User` may be sent to the [Change Password](#forgot-password) screen.
     ```javascript
     user.challengeName === 'NEW_PASSWORD_REQUIRED';
@@ -34,7 +39,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
     ```javascript
     user.challengeName === 'MFA_SETUP';
     ```
-  - **_Note:_** `challengeName` may be empty (if MFA is not set/required) or tied to a custom challenge flow (not demonstrated here).
+  - **_Note:_** `challengeName` may be tied to a custom challenge flow (not demonstrated here).
 
 ### API Errors
 
@@ -60,6 +65,18 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 - `User` can request a [password reset](#forgot-password)
 
+### Possible Tests
+
+- `User` gets error when failing username/password combo.
+- `User` gets error if temporary password has expired.
+- `User` can successfully log in and go to the appropriate _next_ screen:
+  - _Password Change_ if the `User` hasn't changed the temp password.
+  - _TOTP Setup_ if **MFA is set** and `User` **hasn't** registered a device.
+  - _TOTP Confirmation_ if **MFA is set** and `User` **has** registered a device.
+  - _Contact Confirmation_ if `User` hasn't verified their email.
+  - _Protected Page(s)_ if `User` has satisfied the above conditions.
+- `User` should receive an email with their temporary password if one is not given during admin registration/account creation.
+
 ---
 
 ## Sign out
@@ -67,7 +84,6 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 - `User` clicks a button, logs out, and deletes session data.
 - States Visible
   - `signedIn`
-  - TODO? Should this just show up everywhere that isn't SignIn to allow `User` to start over?
 - Methods
 - `Auth.signOut()`
 
@@ -89,9 +105,98 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 ---
 
+## Set Password
+
+- `User` is required to enter a **new password** into a form.
+- States Visible
+  - `requireNewPassword`
+- Methods
+  - `Auth.completeNewPassword(user, password)`
+  - `Auth.verifiedContact(user)`
+
+### API Responses
+
+- `Auth.completeNewPassword(user, password).then(user);`
+  - `User` may be sent to the [Verify Contact](#verify-contact) screen if MFA is optional or not enabled.
+    ```javascript
+    user.challengeName === undefined;
+    ```
+  - `User` may be sent to the [TOTP](#the-one-time-password-totp-confirmation) screen.
+    ```javascript
+    user.challengeName === 'SOFTWARE_TOKEN_MFA' ||
+      user.challengeName === 'SMS_MFA';
+    ```
+  - `User` may be sent to the [TOTP Setup](#the-one-time-password-totp-setup) screen.
+    ```javascript
+    user.challengeName === 'MFA_SETUP';
+    ```
+  - **_Note:_** `challengeName` may be tied to a custom challenge flow (not demonstrated here).
+
+### API Errors
+
+- `Auth.completeNewPassword(user, password).catch(err);`
+  ```javascript
+  // User provides new password that doesn't meet requirements, such as password requires numbers
+  {
+    code: "InvalidPasswordException",
+    name: "InvalidPasswordException",
+    message: "Password does not conform to policy: Password must have numeric characters"
+  }
+  ```
+  ```javascript
+  // Session expired
+  {
+    code: "NotAuthorizedException",
+    name: "NotAuthorizedException",
+    message: "Invalid session for the user, session is expired."
+  }
+  ```
+
+### Secondary Actions
+
+- N/A
+
+---
+
+## Forgot Password
+
+1. `User` enters their **username** into a form.
+1. `User` receives a **six-digit** code via email.
+1. `User` enters their **username**, **six-digit code**, and **new password** into a form to change their password.
+
+- States Visible
+  - `forgotPassword`
+- Methods
+  - `Auth.forgotPasswordSubmit(username, code, password)`
+  - `Auth.forgotPassword(username)`
+
+### API Responses
+
+- TODO
+
+### API Errors
+
+- `Auth.forgotPasswordSubmit(username, code, password).catch(err);`
+
+```javascript
+// Wrong code or User tries reusing code after successful reset
+{
+  code: "ExpiredCodeException",
+  name: "ExpiredCodeException",
+  message: "Invalid code provided, please request a code again."
+}
+```
+
+### Secondary Actions
+
+- `User` can change views because they already have a code.
+- `User` can go back to [Sign In](#sign-in) screen.
+
+---
+
 ## The One-Time Password (TOTP) Setup
 
-- `User` is presented a QR code to set up their device and enters a six-digit code into a form.
+- `User` is presented a QR image to set up their device and enters a six-digit code into a form.
 - States Visible
   - `TOTPSetup`
 - Methods
@@ -105,6 +210,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 - `Auth.setupTOTP(user).then(qrSetupCode)`
   ```javascript
   // Returns a string ID to populate generated QR code.
+  // ID can also be entered manually into Authenticator App (if camera scanning is not available).
   ```
 - `Auth.verifyTotpToken(user, code).then(response)`
   ```javascript
@@ -189,37 +295,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 ### Secondary Actions
 
----
-
-## Reset Password
-
-- `User` enters a **new password** into a form.
-- States Visible
-  - `requireNewPassword`
-- Methods
-
-### API Responses
-
-### API Errors
-
-### Secondary Actions
-
----
-
-## Forgot Password
-
-1. `User` enters their **username** into a form to receive a **six-digit** code.
-1. `User` enters their **username**, **six-digit code**, and **new password** into a form to change their password.
-
-- States Visible
-  - `forgotPassword`
-- Methods
-
-### API Responses
-
-### API Errors
-
-### Secondary Actions
+- `User` can skip verification process and go to [Signed In](#signed-in)
 
 ---
 
@@ -229,33 +305,37 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 - States Visible
   - `signedIn`
 - Methods
+  - N/A
 
 ### API Responses
 
+- N/A
+
 ### API Errors
 
+- N/A
+
 ### Secondary Actions
+
+- `User` can [Sign Out](#sign-out)
 
 ---
 
-# (Template)
+## Other Considerations/Improvements
 
----
-
-## Name
-
-- Desc
-- States
-- Methods
-
-### API Responses
-
-### API Errors
-
-### Secondary Actions
-
--
-
-### API Errors
-
-### Secondary Actions
+- Misc
+  - First/primary textbox/input should auto-focus.
+  - Hitting `ENTER` should submit the form.
+  - ??? `User` should always be able to exit out of the flow? (Refresh would work, too.) ???
+  - ??? `User` should be able to view their password (New Password, Forgot Password, Sign In). ???
+- New Password
+  - ??? `User` needs a way to refresh session when changing their password.
+- Forgot Password
+  - `User` should be notified of a successful password change (redirects them to form to sign in again).
+- TOTP Setup
+  - ??? `User` should be able to enter the QR code manually (printing the `secretCode` to the screen). ???
+- Signed In
+  - ??? `User` should be able to enable/disable MFA from `signedIn` state ???
+- ??? `User` should be instructed to check their email on password request. ???
+- `username` should carry over from **Sign In** to **Forgot Password**.
+- `username` should carry over from **Forgot Password** to **Verify Code**.
