@@ -1,5 +1,6 @@
 import React from 'react';
 import { Auth, JS } from 'aws-amplify';
+import { useAuthUser } from '../useAuthUser';
 import { AuthState } from './AuthState';
 import { ChallengeName } from './ChallengeName';
 import { Button, Error, Form, Input, Label } from '../components';
@@ -11,6 +12,8 @@ const validAuthStates = [
 ];
 
 export function SignIn(props) {
+  const { login } = useAuthUser();
+
   const [form, setForm] = React.useState({
     username: '',
     password: '',
@@ -34,7 +37,7 @@ export function SignIn(props) {
 
     const { username, password } = form;
 
-    Auth.signIn(username, password)
+    login(username, password)
       .then(user => {
         if (user.challengeName === ChallengeName.MFA_SETUP) {
           props.onStateChange(AuthState.TOTPSetup, user);

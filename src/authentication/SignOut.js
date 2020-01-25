@@ -1,14 +1,17 @@
 import React from 'react';
-import { Auth } from 'aws-amplify';
-import { AuthState } from './AuthState';
 import { Button } from '../components';
+import { useAuthUser } from '../useAuthUser';
+import { AuthState } from './AuthState';
 
 const validAuthStates = [AuthState.signedIn];
 
 export function SignOut(props) {
-  async function handleClick() {
-    await Auth.signOut();
+  const { logout } = useAuthUser();
+
+  function handleClick() {
+    logout();
   }
+
   return validAuthStates.includes(props.authState) ? (
     <Button onClick={handleClick}>Sign Out</Button>
   ) : null;
